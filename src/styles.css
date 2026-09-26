@@ -295,6 +295,175 @@ main {
   color: #365f84;
 }
 
+.status-refund {
+  background: color-mix(in oklch, #b3484f, transparent 80%);
+  color: #9c373e;
+}
+
+.compensation-form {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  border: 1px dashed var(--rs-border);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.compensation-form legend {
+  padding: 0 6px;
+  font-weight: 800;
+}
+
+.compensation-form__toggle {
+  display: flex;
+  grid-template-columns: none;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.compensation-form__toggle input {
+  width: auto;
+}
+
+.compensation-panel {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--rs-border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: color-mix(in oklch, var(--rs-accent), transparent 90%);
+}
+
+.compensation-panel--compact {
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.compensation-panel--none {
+  justify-items: start;
+  color: color-mix(in oklch, var(--rs-text), transparent 40%);
+  font-size: 0.86rem;
+  background: color-mix(in oklch, var(--rs-primary), transparent 92%);
+}
+
+.compensation-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.compensation-panel__title {
+  font-weight: 800;
+}
+
+.compensation-panel__amount {
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.compensation-panel__amount small {
+  margin-left: 8px;
+  font-weight: 500;
+  font-size: 0.78rem;
+  color: color-mix(in oklch, var(--rs-text), transparent 38%);
+}
+
+.compensation-panel__rows {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.compensation-panel__rows div {
+  display: grid;
+  gap: 2px;
+  border-radius: 7px;
+  background: color-mix(in oklch, var(--rs-surface), transparent 8%);
+  padding: 8px 10px;
+}
+
+.compensation-panel__rows dt {
+  color: color-mix(in oklch, var(--rs-text), transparent 40%);
+  font-size: 0.76rem;
+}
+
+.compensation-panel__rows dd {
+  margin: 0;
+  font-weight: 800;
+}
+
+.compensation-panel__rows dd.is-wait {
+  color: #9b5c1c;
+}
+
+.compensation-panel__rows dd.is-refund {
+  color: #9c373e;
+}
+
+.compensation-panel__hint {
+  margin: 0;
+  color: color-mix(in oklch, var(--rs-text), transparent 32%);
+  font-size: 0.82rem;
+}
+
+.exchange-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.exchange-detail-panel {
+  display: grid;
+  gap: 16px;
+  border: 1px solid var(--rs-border);
+  border-radius: 8px;
+  background: color-mix(in oklch, var(--rs-surface), transparent 1%);
+  padding: 22px;
+}
+
+.exchange-detail-panel h2 {
+  margin: 0;
+}
+
+.exchange-detail-side {
+  gap: 18px;
+}
+
+.exchange-detail-message {
+  margin: 0;
+  line-height: 1.65;
+}
+
+.detail-list--time {
+  grid-template-columns: 1fr 1fr;
+}
+
+.exchange-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.exchange-card__detail {
+  font-weight: 700;
+  color: var(--rs-primary);
+  text-decoration: underline;
+}
+
+.profile-compensation {
+  display: grid;
+  gap: 10px;
+}
+
+.profile-compensation h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
 .gallery {
   display: grid;
   gap: 10px;
@@ -661,6 +830,7 @@ textarea {
 
   .detail-layout,
   .profile-layout,
+  .exchange-detail-grid,
   .exchange-card__items,
   .detail-list {
     grid-template-columns: 1fr;

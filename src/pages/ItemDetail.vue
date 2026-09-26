@@ -42,6 +42,36 @@
             留言
             <textarea v-model="messageText" rows="3" />
           </label>
+
+          <fieldset class="compensation-form">
+            <legend>补差额（双方物品价值不等时填写）</legend>
+            <label class="compensation-form__toggle">
+              <input v-model="compensationEnabled" type="checkbox" />
+              <span>需要补差价</span>
+            </label>
+            <template v-if="compensationEnabled">
+              <label>
+                付款方
+                <select v-model="compensationPayer">
+                  <option
+                    v-for="option in COMPENSATION_PAYER_OPTIONS"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
+              </label>
+              <label>
+                补款金额（元）
+                <input v-model="compensationAmount" inputmode="decimal" placeholder="请输入补款金额" type="number" />
+              </label>
+              <p class="form-note">
+                物主同意后先生成待补款，收款方确认到账并登记后，交换才会进入交换中；一笔交换只认一笔补款。
+              </p>
+            </template>
+          </fieldset>
+
           <button class="primary-button" type="button" :disabled="item.status !== ItemStatus.AVAILABLE" @click="requestExchange">
             发起交换
           </button>
@@ -62,13 +92,16 @@ import { RouterLink, useRoute } from 'vue-router';
 import EmptyState from '@/components/common/EmptyState.vue';
 import ItemImageGallery from '@/components/common/ItemImageGallery.vue';
 import UserBrief from '@/components/common/UserBrief.vue';
+import { COMPENSATION_PAYER_OPTIONS, CompensationPayer } from '@/constants/compensation';
 import { ExchangeStatus } from '@/constants/exchange';
 import { ItemStatus } from '@/constants/item';
+import type { CompensationProposal } from '@/models/compensation';
 import { useAuthStore } from '@/stores/authStore';
 import { useExchangeStore } from '@/stores/exchangeStore';
 import { useItemStore } from '@/stores/itemStore';
 import { formatCondition, formatDate, formatItemStatus, statusToneClass } from '@/utils/formatters';
 import { message } from '@/utils/message';
+import { validateCompensationProposal } from '@/utils/validators';
 
 const route = useRoute();
 const itemStore = useItemStore();
@@ -84,6 +117,10 @@ const ownAvailableItems = computed(() =>
 const selectedItemId = ref('');
 const messageText = ref('我想用这件闲置与你交换，可以沟通时间和地点。');
 
+const compensationEnabled = ref(false);
+const compensationPayer = ref<CompensationPayer>(CompensationPayer.INITIATOR);
+const compensationAmount = ref<string>('');
+
 const requestExchange = async () => {
   if (!authStore.currentUser || !item.value || !owner.value) return;
   if (!itemStore.assertCanExchange(authStore.currentUser.id)) return;
@@ -91,6 +128,17 @@ const requestExchange = async () => {
     message('请选择一件自己的物品', 'error');
     return;
   }
+
+  const amount = Number(compensationAmount.value);
+  const proposal: CompensationProposal | null = compensationEnabled.value
+    ? { amount, payer: compensationPayer.value }
+    : null;
+  const compensationError = validateCompensationProposal(compensationEnabled.value, proposal);
+  if (compensationError) {
+    message(compensationError, 'error');
+    return;
+  }
+
   await exchangeStore.create({
     from_user_id: authStore.currentUser.id,
     to_user_id: owner.value.id,
@@ -98,6 +146,7 @@ const requestExchange = async () => {
     to_item_id: item.value.id,
     status: ExchangeStatus.PENDING,
     message: messageText.value,
+    compensation: proposal,
   });
 };
 

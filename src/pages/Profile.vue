@@ -40,6 +40,20 @@
           <span>可交换 {{ availableCount }}</span>
           <span>信用 {{ currentUser.credit_score }}</span>
         </div>
+        <section class="profile-compensation">
+          <h2>补差额</h2>
+          <div class="stats-row">
+            <span>待付 {{ formatMoney(compensationStats.toPay) }}</span>
+            <span>已付 {{ formatMoney(compensationStats.paid) }}</span>
+            <span>待退回 {{ formatMoney(compensationStats.refunding) }}</span>
+            <span>已退回 {{ formatMoney(compensationStats.refunded) }}</span>
+          </div>
+          <div v-if="compensationStats.toReceive || compensationStats.toReturn" class="stats-row">
+            <span v-if="compensationStats.toReceive">待收 {{ formatMoney(compensationStats.toReceive) }}</span>
+            <span>已收 {{ formatMoney(compensationStats.received) }}</span>
+            <span v-if="compensationStats.toReturn">待退还 {{ formatMoney(compensationStats.toReturn) }}</span>
+          </div>
+        </section>
       </div>
     </div>
 
@@ -67,10 +81,14 @@ import ItemCard from '@/components/common/ItemCard.vue';
 import UserBrief from '@/components/common/UserBrief.vue';
 import { ItemStatus } from '@/constants/item';
 import { useAuth } from '@/hooks/useAuth';
+import { useCompensationStats } from '@/hooks/useCompensationStats';
+import { useExchangeStore } from '@/stores/exchangeStore';
 import { useItemStore } from '@/stores/itemStore';
+import { formatMoney } from '@/utils/formatters';
 
 const { currentUser, users, login, updateProfile } = useAuth();
 const itemStore = useItemStore();
+const exchangeStore = useExchangeStore();
 const selectedUserId = ref('');
 
 const form = reactive({
@@ -101,6 +119,11 @@ watch(
 
 const myItems = computed(() => (currentUser.value ? itemStore.myItems(currentUser.value.id) : []));
 const availableCount = computed(() => myItems.value.filter((item) => item.status === ItemStatus.AVAILABLE).length);
+const compensationStats = useCompensationStats(
+  () => exchangeStore.exchanges,
+  () => exchangeStore.compensations,
+  () => currentUser.value?.id,
+);
 
 const save = async () => {
   await updateProfile({ ...form });

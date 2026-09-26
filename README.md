@@ -16,8 +16,9 @@ ReSwap 是一个纯前端以物换物 Web 应用。用户可以本地模拟登�
 - 首页瀑布流浏览、分类筛选、关键词搜索。
 - 物品详情、物主资料、选择自己的物品发起交换。
 - 发布物品，支持本地 base64 图片上传、分类和成色选择。
-- 交换管理，区分我发起的和我收到的请求，支持同意、拒绝、完成。
-- 个人中心，编辑资料、上传头像、查看我发布的物品。
+- 交换管理，区分我发起的和我收到的请求，支持同意、拒绝、取消、完成。
+- 补差额：价值不等时约定差价付款方与金额，待补款、到账登记、退回登记全流程可追踪。
+- 个人中心，编辑资料、上传头像、查看我发布的物品和补款金额汇总。
 - 主题切换、全局错误处理和 Vant 提示。
 
 ## 启动与构建
@@ -49,16 +50,16 @@ pnpm build
 
 ```text
 src/
-├── api/              # userApi.ts, itemApi.ts, exchangeApi.ts：本地数据 API 层
+├── api/              # userApi.ts, itemApi.ts, exchangeApi.ts, compensationApi.ts：本地数据 API 层
 ├── stores/           # authStore.ts, itemStore.ts, exchangeStore.ts, themeStore.ts
-├── models/           # user.ts, item.ts, exchange.ts：独立数据模型
+├── models/           # user.ts, item.ts, exchange.ts, compensation.ts：独立数据模型
 ├── types/            # 共享类型补充
 ├── components/common/# 共享业务组件和 GlobalErrorBoundary
-├── hooks/            # useAuth.ts, useLocalStorage.ts, useExchangeStats.ts
-├── pages/            # Home, ItemDetail, Publish, Exchanges, Profile
+├── hooks/            # useAuth.ts, useLocalStorage.ts, useExchangeStats.ts, useCompensationStats.ts
+├── pages/            # Home, ItemDetail, Publish, Exchanges, ExchangeDetail, Profile
 ├── router/           # index.ts + guards.ts
-├── utils/            # storage.ts, formatters.ts, validators.ts, message.ts, themeUtils.ts
-├── constants/        # item.ts, exchange.ts, themes.ts, messages.ts
+├── utils/            # storage.ts, formatters.ts, validators.ts, compensation.ts, message.ts, themeUtils.ts
+├── constants/        # item.ts, exchange.ts, compensation.ts, themes.ts, messages.ts
 ├── App.vue
 ├── main.ts
 └── styles.css
@@ -105,13 +106,54 @@ src/
 - `src/models/exchange.ts`
 - `src/constants/messages.ts`
 - `src/api/exchangeApi.ts`
+- `src/api/compensationApi.ts`
 - `src/stores/exchangeStore.ts`
 - `src/router/guards.ts`
 - `src/utils/formatters.ts`
+- `src/utils/compensation.ts`
 - `src/hooks/useExchangeStats.ts`
+- `src/components/common/ExchangeCard.vue`
+- `src/components/common/CompensationPanel.vue`
+- `src/pages/ItemDetail.vue`
+- `src/pages/Exchanges.vue`
+- `src/pages/ExchangeDetail.vue`
+
+值：`PENDING`（待确认）、`AWAITING_PAYMENT`（待补款）、`ACCEPTED`（交换中）、`REJECTED`（已拒绝）、`COMPLETED`（已完成）、`CANCELLED`（已取消）。
+
+### CompensationStatus / CompensationPayer
+
+定义位置：`src/constants/compensation.ts`
+
+出现位置：
+
+- `src/models/compensation.ts`
+- `src/models/exchange.ts`
+- `src/constants/messages.ts`
+- `src/api/compensationApi.ts`
+- `src/api/exchangeApi.ts`
+- `src/stores/exchangeStore.ts`
+- `src/utils/formatters.ts`
+- `src/utils/compensation.ts`
+- `src/utils/validators.ts`
+- `src/hooks/useCompensationStats.ts`
+- `src/components/common/CompensationPanel.vue`
 - `src/components/common/ExchangeCard.vue`
 - `src/pages/ItemDetail.vue`
 - `src/pages/Exchanges.vue`
+- `src/pages/ExchangeDetail.vue`
+- `src/pages/Profile.vue`
+
+值：`CompensationStatus` 为 `PENDING`（待补款）、`PAID`（已到账）、`REFUNDING`（待退回）、`REFUNDED`（已退回）；`CompensationPayer` 为 `INITIATOR`（发起方补款）、`OWNER`（物主补款）。
+
+## 补差额（差价补偿）流程
+
+双方物品价值不等时，可在发起交换时勾选“需要补差价”，选择付款方（发起方/物主）并填写金额：
+
+1. 发起时随请求写入补款约定，物主在待确认页同意。
+2. 物主同意时：有补款则生成**一笔**待补款，交换进入“待补款”；无补款直接进入“交换中”。
+3. 付款方线下转账后，由**收款方**登记到账；登记成功交换才进入“交换中”。一笔交换只认一笔补款，重复登记不累加。
+4. 交换被拒绝或取消时，已到账金额**保留**为“待退回”，登记退回后变为“已退回”；未到账的待补款不保留金额。
+5. 列表（ExchangeCard）、详情（`/exchange/:id`）与个人中心均展示待付、已付、待退回、已退回金额（收款方视角显示待收/已收/待退还）。旧请求没有补款约定，按“无需补款”处理。
 
 ## 分层与高耦合约束
 
