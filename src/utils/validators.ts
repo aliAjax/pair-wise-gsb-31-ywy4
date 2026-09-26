@@ -14,3 +14,14 @@ export const validateUserDraft = (draft: Partial<UserDraft>) => {
   if (!draft.phone?.trim()) return FORM_MESSAGES.requiredPhone;
   return '';
 };
+
+/** 发起交换时的补差校验：需要补款时必须明确付款方且金额大于 0 */
+export const validateCompensation = (compensationEnabled: boolean, amountInput: string, payerId: string) => {
+  if (!compensationEnabled) return '';
+  if (!payerId) return FORM_MESSAGES.compensationNeedPayer;
+  const amount = Number(amountInput);
+  if (!amountInput.trim() || Number.isNaN(amount)) return FORM_MESSAGES.compensationAmountInvalid;
+  if (amount <= 0) return FORM_MESSAGES.compensationAmountPositive;
+  if (!/^\d+(\.\d{1,2})?$/.test(amountInput.trim())) return FORM_MESSAGES.compensationAmountPrecision;
+  return '';
+};

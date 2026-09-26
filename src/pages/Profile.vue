@@ -43,6 +43,35 @@
       </div>
     </div>
 
+    <section class="comp-ledger">
+      <h2>补差额账本</h2>
+      <div v-if="compStats.total" class="comp-ledger__grid">
+        <div class="comp-ledger__group">
+          <h3>我作为付款方</h3>
+          <div class="stats-row">
+            <span>待付 {{ formatMoney(compStats.payerPending) }}</span>
+            <span>已付 {{ formatMoney(compStats.payerPaid) }}</span>
+            <span>已退回 {{ formatMoney(compStats.payerRefunded) }}</span>
+          </div>
+          <p v-if="compStats.payerRefundable > 0" class="form-note comp-refund-text">
+            还有 {{ formatMoney(compStats.payerRefundable) }} 已付款等待对方退回
+          </p>
+        </div>
+        <div class="comp-ledger__group">
+          <h3>我作为收款方</h3>
+          <div class="stats-row">
+            <span>待收 {{ formatMoney(compStats.payeePending) }}</span>
+            <span>已收 {{ formatMoney(compStats.payeeReceived) }}</span>
+            <span>已退回 {{ formatMoney(compStats.payeeRefunded) }}</span>
+          </div>
+          <p v-if="compStats.payeeRefundable > 0" class="form-note comp-refund-text">
+            有 {{ formatMoney(compStats.payeeRefundable) }} 已到账补款需要线下退回并登记
+          </p>
+        </div>
+      </div>
+      <EmptyState v-else title="暂无补差记录" :description="PAGE_MESSAGES.compensationNone" mark="¥" />
+    </section>
+
     <section class="my-items">
       <h2>我发布的物品</h2>
       <div v-if="myItems.length" class="waterfall waterfall--compact">
@@ -66,11 +95,16 @@ import EmptyState from '@/components/common/EmptyState.vue';
 import ItemCard from '@/components/common/ItemCard.vue';
 import UserBrief from '@/components/common/UserBrief.vue';
 import { ItemStatus } from '@/constants/item';
+import { PAGE_MESSAGES } from '@/constants/messages';
 import { useAuth } from '@/hooks/useAuth';
+import { useCompensationStats } from '@/hooks/useCompensationStats';
+import { useExchangeStore } from '@/stores/exchangeStore';
 import { useItemStore } from '@/stores/itemStore';
+import { formatMoney } from '@/utils/formatters';
 
 const { currentUser, users, login, updateProfile } = useAuth();
 const itemStore = useItemStore();
+const exchangeStore = useExchangeStore();
 const selectedUserId = ref('');
 
 const form = reactive({
@@ -101,6 +135,10 @@ watch(
 
 const myItems = computed(() => (currentUser.value ? itemStore.myItems(currentUser.value.id) : []));
 const availableCount = computed(() => myItems.value.filter((item) => item.status === ItemStatus.AVAILABLE).length);
+const compStats = useCompensationStats(
+  () => exchangeStore.exchanges,
+  () => currentUser.value?.id,
+);
 
 const save = async () => {
   await updateProfile({ ...form });

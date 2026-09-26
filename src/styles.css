@@ -120,8 +120,7 @@ button {
 
 .topbar nav a.router-link-active,
 .primary-link,
-.primary-button,
-.exchange-card__actions button:first-child {
+.primary-button {
   border-color: transparent;
   background: var(--rs-primary);
   color: var(--rs-surface);
@@ -599,6 +598,146 @@ textarea {
   gap: 18px;
 }
 
+.comp-toggle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.comp-toggle input {
+  width: auto;
+}
+
+.comp-form {
+  display: grid;
+  gap: 12px;
+  border: 1px dashed var(--rs-border);
+  border-radius: 8px;
+  padding: 14px;
+  background: color-mix(in oklch, var(--rs-accent), transparent 90%);
+}
+
+.comp-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.comp-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: color-mix(in oklch, var(--rs-primary), transparent 86%);
+  color: var(--rs-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.comp-chip--amount {
+  background: color-mix(in oklch, var(--rs-accent), transparent 78%);
+  color: var(--rs-accent);
+}
+
+.comp-chip--pending {
+  background: color-mix(in oklch, #bb7a35, transparent 78%);
+  color: #9b5c1c;
+}
+
+.comp-chip--paid {
+  background: color-mix(in oklch, #3f7c55, transparent 78%);
+  color: #2f7548;
+}
+
+.comp-chip--refund {
+  background: color-mix(in oklch, #b04a4a, transparent 78%);
+  color: #993d3d;
+}
+
+.comp-chip--none {
+  background: color-mix(in oklch, var(--rs-text), transparent 90%);
+  color: color-mix(in oklch, var(--rs-text), transparent 30%);
+}
+
+.detail-section-title {
+  margin: 0;
+}
+
+.comp-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.comp-detail-grid div {
+  border-radius: 7px;
+  background: color-mix(in oklch, var(--rs-primary), transparent 88%);
+  padding: 12px;
+}
+
+.comp-detail-grid dt {
+  color: color-mix(in oklch, var(--rs-text), transparent 36%);
+  font-size: 0.8rem;
+}
+
+.comp-detail-grid dd {
+  margin: 5px 0 0;
+  font-weight: 800;
+}
+
+.comp-refund-text {
+  color: #993d3d;
+  font-weight: 700;
+}
+
+.comp-flow-note {
+  margin: 0;
+  color: color-mix(in oklch, var(--rs-text), transparent 25%);
+}
+
+.exchange-detail-card {
+  gap: 14px;
+}
+
+.exchange-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.comp-ledger {
+  display: grid;
+  gap: 14px;
+}
+
+.comp-ledger h2,
+.comp-ledger h3 {
+  margin: 0;
+}
+
+.comp-ledger__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.comp-ledger__group {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--rs-border);
+  border-radius: 8px;
+  background: color-mix(in oklch, var(--rs-surface), transparent 1%);
+  padding: 18px;
+}
+
+.exchange-card__detail {
+  min-height: auto;
+  padding: 4px 8px;
+}
+
 .my-items {
   display: grid;
   gap: 16px;
@@ -662,7 +801,9 @@ textarea {
   .detail-layout,
   .profile-layout,
   .exchange-card__items,
-  .detail-list {
+  .detail-list,
+  .comp-detail-grid,
+  .comp-ledger__grid {
     grid-template-columns: 1fr;
   }
 

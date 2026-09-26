@@ -38,6 +38,25 @@
               </option>
             </select>
           </label>
+          <label class="comp-toggle">
+            <input v-model="compensationEnabled" type="checkbox" />
+            双方物品价值不等，约定补差价
+          </label>
+          <div v-if="compensationEnabled" class="comp-form">
+            <label>
+              付款方
+              <select v-model="compensationPayerId">
+                <option value="">选择由谁补款</option>
+                <option :value="currentUserId">我（发起方）补差价给物主</option>
+                <option v-if="owner" :value="owner.id">物主补差价给我</option>
+              </select>
+            </label>
+            <label>
+              补差金额（元）
+              <input v-model="compensationAmount" inputmode="decimal" placeholder="例如 50.00" type="text" />
+            </label>
+            <p class="form-note">{{ PAGE_MESSAGES.compensationHint }}</p>
+          </div>
           <label>
             留言
             <textarea v-model="messageText" rows="3" />
@@ -64,11 +83,13 @@ import ItemImageGallery from '@/components/common/ItemImageGallery.vue';
 import UserBrief from '@/components/common/UserBrief.vue';
 import { ExchangeStatus } from '@/constants/exchange';
 import { ItemStatus } from '@/constants/item';
+import { PAGE_MESSAGES } from '@/constants/messages';
 import { useAuthStore } from '@/stores/authStore';
 import { useExchangeStore } from '@/stores/exchangeStore';
 import { useItemStore } from '@/stores/itemStore';
 import { formatCondition, formatDate, formatItemStatus, statusToneClass } from '@/utils/formatters';
 import { message } from '@/utils/message';
+import { validateCompensation } from '@/utils/validators';
 
 const route = useRoute();
 const itemStore = useItemStore();
@@ -83,12 +104,21 @@ const ownAvailableItems = computed(() =>
 );
 const selectedItemId = ref('');
 const messageText = ref('我想用这件闲置与你交换，可以沟通时间和地点。');
+const compensationEnabled = ref(false);
+const compensationPayerId = ref('');
+const compensationAmount = ref('');
+const currentUserId = computed(() => authStore.currentUser?.id ?? '');
 
 const requestExchange = async () => {
   if (!authStore.currentUser || !item.value || !owner.value) return;
   if (!itemStore.assertCanExchange(authStore.currentUser.id)) return;
   if (!selectedItemId.value) {
     message('请选择一件自己的物品', 'error');
+    return;
+  }
+  const compensationError = validateCompensation(compensationEnabled.value, compensationAmount.value, compensationPayerId.value);
+  if (compensationError) {
+    message(compensationError, 'error');
     return;
   }
   await exchangeStore.create({
@@ -98,6 +128,8 @@ const requestExchange = async () => {
     to_item_id: item.value.id,
     status: ExchangeStatus.PENDING,
     message: messageText.value,
+    compensation_amount: compensationEnabled.value ? Number(compensationAmount.value) : 0,
+    compensation_payer_id: compensationEnabled.value ? compensationPayerId.value : null,
   });
 };
 
